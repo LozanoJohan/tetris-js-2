@@ -1,8 +1,7 @@
 import { BOARD_HEIGHT, BOARD_WIDTH, BLOCK_SIZE, FRAME_TIME, board, createBoard } from "./constants"
 import { getRandomFigure, checkYCollition, checkXCollition, rotatePiece } from "./utils"
-import { setPaused, paused, gameOver, setGameOver } from "./gameStates"
+import { setPaused, paused, gameOver, setGameOver, piece, setPiece } from "./gameStates"
 
-let piece
 let time
 let context
 
@@ -14,7 +13,7 @@ function start() {
   context = canvas.getContext('2d')
 
   // Initializing piece and its position
-  piece = getRandomFigure()
+  setPiece(getRandomFigure())
   time = 0
 
   canvas.width = BLOCK_SIZE * BOARD_WIDTH
@@ -37,11 +36,11 @@ function update() {
     time++
 
     if (time > FRAME_TIME) {
-      handleArrowPress(piece, "ArrowDown")
+      handleArrowPress("ArrowDown")
       time = 0
     }
 
-    if (checkYCollition(piece)) piece = getRandomFigure()
+    if (checkYCollition()) setPiece(getRandomFigure())
     draw()
 
     window.requestAnimationFrame(update)
@@ -72,11 +71,10 @@ function draw() {
 
 document.addEventListener('keydown', (event) => {
   const key = event.key;
-  handleArrowPress(piece, key)
+  handleArrowPress(key)
 });
 
-function handleArrowPress(piece, action) {
-
+function handleArrowPress(action) {
   // Reset squares
   piece.forEach((row, y) => row.forEach((_, x) => {
     board[y + piece.position[1]][x + piece.position[0]] = 0
@@ -85,23 +83,24 @@ function handleArrowPress(piece, action) {
   switch (action) {
     case "ArrowLeft":
 
-      if (!checkXCollition(piece, "left"))
+      if (!checkXCollition("left"))
         piece.position[0]--
       break;
 
     case "ArrowRight":
 
-      if (!checkXCollition(piece, "right"))
+      if (!checkXCollition("right"))
         piece.position[0]++
       break;
 
     case "ArrowDown":
+
       piece.position[1]++
       break;
 
     case "ArrowUp":
 
-      piece = rotatePiece(piece)
+      setPiece(rotatePiece(piece))
       break;
   }
 
@@ -137,7 +136,7 @@ document.querySelector('#play-again-btn').addEventListener('click', (e) => {
   gameOverMenu.style.display = 'none'
 
   piece.position[1] = 0
-  
+
   createBoard()
   update()
 })

@@ -1,5 +1,5 @@
 import { PIECES, BOARD_WIDTH, board, AVAIABLE_COLORS } from "./constants"
-import { setGameOver } from "./gameStates"
+import { setGameOver, piece } from "./gameStates"
 
 const getRandomStartingPos = (board_width) => Math.floor(Math.random() * (board_width - 2) + 1)
 const getRandomColor = () => AVAIABLE_COLORS[Math.floor(Math.random() * AVAIABLE_COLORS.length)]
@@ -15,7 +15,7 @@ export const getRandomFigure = () => {
     return piece
 }
 
-export const checkYCollition = (piece) => {
+export const checkYCollition = () => {
 
     const currentPos = piece.position
     let collided = false
@@ -32,15 +32,18 @@ export const checkYCollition = (piece) => {
 
             collided = true
 
-            const landedRowIndex = currentPos[1] + piece.length - 1
-            if (!checkRowDelete(landedRowIndex) && landedRowIndex < 2)
-                setGameOver(true)
+            piece.forEach((row, y) => {
+
+                const landedRowsIndex = currentPos[1] + y
+                if (!checkRowDelete(landedRowsIndex) && landedRowsIndex < 2)
+                    setGameOver(true)
+            })
         }
     })
     return collided
 }
 
-export const checkXCollition = (piece, direction) => {
+export const checkXCollition = (direction) => {
 
     const currentPos = piece.position
     let collided = false
@@ -75,7 +78,12 @@ const checkRowDelete = (index) => {
     return false
 }
 
-export const rotatePiece = (piece) => {
+export const rotatePiece = () => {
+
+    // Reset squares
+    piece.forEach((row, y) => row.forEach((_, x) => {
+        board[y + piece.position[1]][x + piece.position[0]] = 0
+    }))
 
     const newPiece = []
     // ESTO ES LO MÁS COMPLICADO DE LEJOS
@@ -87,10 +95,9 @@ export const rotatePiece = (piece) => {
         }
 
         newPiece.push(row)
-        
+
         newPiece.position = piece.position
         newPiece.color = piece.color
     }
     return newPiece
-
 }
